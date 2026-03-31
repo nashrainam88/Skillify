@@ -1,202 +1,238 @@
-import os
-from flask import Flask, render_template, request, redirect, url_for, session, flash
+from flask import Flask, render_template, request, redirect, session, flash, url_for
 import mysql.connector
-from mysql.connector import errorcode
 from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
-app.secret_key = "skillify_premium_secret"
-
-# DB Config
-DB_CONFIG = {
-    'user': 'root',
-    'password': 'nashra@2025',
-    'host': 'localhost',
-    'auth_plugin': 'mysql_native_password'
-}
-DB_NAME = 'skillify'
+app.secret_key = 'skillify_super_secret_key'
 
 def init_db():
+    """Initializes the database and the required tables if they don't exist."""
+    print("Attempting to connect to MySQL Server to initialize database...")
     try:
-        conn = mysql.connector.connect(**DB_CONFIG)
+        # Connect to MySQL Server (without specifying a DB first)
+        conn = mysql.connector.connect(
+            host="localhost",
+            user="root",
+            password="nashra@2025"
+        )
         cursor = conn.cursor()
-        cursor.execute(f"CREATE DATABASE IF NOT EXISTS {DB_NAME} DEFAULT CHARACTER SET 'utf8'")
-        cursor.execute(f"USE {DB_NAME}")
-
+        
+        # Create the skillify database
+        cursor.execute("CREATE DATABASE IF NOT EXISTS skillify")
+        conn.commit()
+        cursor.close()
+        conn.close()
+        
+        # Reconnect to the specifically created database
+        conn = mysql.connector.connect(
+            host="localhost",
+            user="root",
+            password="nashra@2025",
+            database="skillify"
+        )
+        cursor = conn.cursor()
+        
         # Create users table
-        cursor.execute("""
+        cursor.execute('''
             CREATE TABLE IF NOT EXISTS users (
                 id INT AUTO_INCREMENT PRIMARY KEY,
-                firstname VARCHAR(50) NOT NULL,
-                lastname VARCHAR(50) NOT NULL,
-                username VARCHAR(50) UNIQUE NOT NULL,
-                email VARCHAR(100) UNIQUE NOT NULL,
+                firstname VARCHAR(100) NOT NULL,
+                lastname VARCHAR(100) NOT NULL,
+                username VARCHAR(100) UNIQUE NOT NULL,
+                email VARCHAR(150) UNIQUE NOT NULL,
                 password VARCHAR(255) NOT NULL,
-                role ENUM('student', 'mentor', 'admin') NOT NULL,
+                role VARCHAR(50) NOT NULL,
                 skills TEXT,
-                course TEXT,
-                college VARCHAR(100),
                 bio TEXT,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
-        """)
+        ''')
         conn.commit()
-    except mysql.connector.Error as err:
-        print(f"Database error during initialization: {err}")
-    finally:
-        if 'cursor' in locals(): cursor.close()
-        if 'conn' in locals(): conn.close()
+        cursor.close()
+        conn.close()
+        print("Database and 'users' table initialized successfully.")
+    except Exception as e:
+        print("Error initializing database:", e)
 
+# Call initialization on startup
 init_db()
 
 def get_db():
-    config = DB_CONFIG.copy()
-    config['database'] = DB_NAME
-    return mysql.connector.connect(**config)
+    """Helper function to get a database connection."""
+    return mysql.connector.connect(
+        host="localhost",
+        user="root",
+        password="nashra@2025",
+        database="skillify"
+    )
 
-@app.route("/")
+# HOME / LANDING PAGE
+@app.route('/')
 def home():
-    if "user_id" in session:
-        return redirect(url_for("dashboard"))
-    return redirect(url_for("login"))
+    return render_template('index.html')
 
-@app.route("/signup", methods=["GET", "POST"])
+# SIGNUP
+@app.route('/signup', methods=['GET', 'POST'])
 def signup():
-    if request.method == "POST":
-        firstname = request.form.get("firstname")
-        lastname = request.form.get("lastname")
-        username = request.form.get("username")
-        email = request.form.get("email")
-        password = request.form.get("password")
-        role = request.form.get("role")
-        
-        # Joined string for multi-select
-        skills = ", ".join(request.form.getlist("skills"))
-        course = ", ".join(request.form.getlist("course"))
-        college = request.form.get("college")
-        bio = request.form.get("bio")
-
-        if not all([firstname, lastname, username, email, password, role]):
-            flash("Please fill in all required fields.", "error")
-            return redirect(url_for('signup'))
-            
-        hashed_password = generate_password_hash(password)
-
+    if request.method == 'POST':
         try:
+            firstname = request.form['firstname']
+            lastname = request.form['lastname']
+            username = request.form['username']
+            email = request.form['email']
+            password = request.form['password']
+            role = request.form['role']
+            
+            # Additional fields depending on role, join them into JSON/text or simple string
+            skills = request.form.get('skills', '')
+            bio = request.form.get('bio', '')
+            admin_code = request.form.get('admin_code', '')
+            
+            # Example logic for admin validation
+            if role == 'admin' and admin_code != 'SECRET2025':
+                flash("Invalid admin code provided.", "error")
+                return redirect(url_for('signup'))
+            
+            # Hash password for safety
+            hashed_pw = generate_password_hash(password)
+            
             conn = get_db()
             cursor = conn.cursor()
-            cursor.execute('''
-                INSERT INTO users 
-                (firstname, lastname, username, email, password, role, skills, course, college, bio) 
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-            ''', (firstname, lastname, username, email, hashed_password, role, skills, course, college, bio))
+            
+            # Check if username or email already exists
+            cursor.execute("SELECT * FROM users WHERE email=%s OR username=%s", (email, username))
+            if cursor.fetchone():
+                flash("Email or Username already exists.", "error")
+                return redirect(url_for('signup'))
+            
+            cursor.execute(
+                "INSERT INTO users (firstname, lastname, username, email, password, role, skills, bio) VALUES (%s,%s,%s,%s,%s,%s,%s,%s)",
+                (firstname, lastname, username, email, hashed_pw, role, skills, bio)
+            )
             conn.commit()
-            flash("Account created successfully! Please login.", "success")
-            return redirect(url_for("login"))
-        except mysql.connector.Error as err:
-             if err.errno == errorcode.ER_DUP_ENTRY:
-                 flash("Username or Email already exists.", "error")
-             else:
-                 flash(f"Database error: {err}", "error")
-        finally:
-             if 'cursor' in locals(): cursor.close()
-             if 'conn' in locals(): conn.close()
-             
-    return render_template("signup.html")
+            cursor.close()
+            conn.close()
+            
+            flash("Account created successfully! Please log in.", "success")
+            return redirect(url_for('login'))
+        except Exception as e:
+            print(f"Signup error: {e}")
+            flash(f"An error occurred during signup: {str(e)}", "error")
+            return redirect(url_for('signup'))
 
-@app.route("/login", methods=["GET", "POST"])
+    return render_template('signup.html')
+
+# LOGIN
+@app.route('/login', methods=['GET', 'POST'])
 def login():
-    if request.method == "POST":
-        username = request.form.get("username")
-        password = request.form.get("password")
-
+    if request.method == 'POST':
+        email = request.form['email']
+        password = request.form['password']
+        
         try:
             conn = get_db()
             cursor = conn.cursor(dictionary=True)
-            cursor.execute("SELECT * FROM users WHERE username = %s", (username,))
+            cursor.execute("SELECT * FROM users WHERE email=%s", (email,))
             user = cursor.fetchone()
-        except mysql.connector.Error as err:
-            flash(f"Database error: {err}", "error")
-            user = None
-        finally:
-            if 'cursor' in locals(): cursor.close()
-            if 'conn' in locals(): conn.close()
+            cursor.close()
+            conn.close()
+            
+            if user and check_password_hash(user['password'], password):
+                # Setup session
+                session['user_id'] = user['id']
+                session['username'] = user['username']
+                session['role'] = user['role']
+                
+                # Role-based redirect
+                if user['role'] == 'student':
+                    return redirect(url_for('dashboard_student'))
+                elif user['role'] == 'mentor':
+                    return redirect(url_for('dashboard_mentor'))
+                elif user['role'] == 'admin':
+                    return redirect(url_for('dashboard_admin'))
+                else:
+                    return redirect(url_for('dashboard_student'))
+                    
+            else:
+                flash("Invalid credentials. Please try again.", "error")
+        except Exception as e:
+            print("Login error:", e)
+            flash("Database connection error.", "error")
+            
+    return render_template('login.html')
 
-        if user and check_password_hash(user['password'], password):
-            session['user_id'] = user['id']
-            session['username'] = user['username']
-            session['role'] = user['role']
-            session['firstname'] = user['firstname']
-            return redirect(url_for('dashboard'))
-        else:
-            flash("Invalid username or password.", "error")
-
-    return render_template("login.html")
-
-@app.route("/dashboard")
-def dashboard():
-    if "user_id" not in session:
-        return redirect(url_for("login"))
-        
-    try:
-        conn = get_db()
-        cursor = conn.cursor(dictionary=True)
-        cursor.execute("SELECT * FROM users WHERE id = %s", (session["user_id"],))
-        user = cursor.fetchone()
-    except mysql.connector.Error:
-        user = None
-    finally:
-        if 'cursor' in locals(): cursor.close()
-        if 'conn' in locals(): conn.close()
-    
-    return render_template("dashboard.html", user=user)
-
-@app.route("/profile")
-def profile():
-    if "user_id" not in session:
-        return redirect(url_for("login"))
-        
-    try:
-        conn = get_db()
-        cursor = conn.cursor(dictionary=True)
-        cursor.execute("SELECT * FROM users WHERE id = %s", (session["user_id"],))
-        user = cursor.fetchone()
-    except mysql.connector.Error:
-        user = None
-    finally:
-         if 'cursor' in locals(): cursor.close()
-         if 'conn' in locals(): conn.close()
-    
-    return render_template("profile.html", user=user)
-
-@app.route("/browse")
-def browse():
-    if "user_id" not in session:
-        return redirect(url_for("login"))
-        
-    try:
-        conn = get_db()
-        cursor = conn.cursor(dictionary=True)
-        cursor.execute("SELECT id, firstname, lastname, role, skills, college FROM users WHERE id != %s", (session["user_id"],))
-        users = cursor.fetchall()
-    except mysql.connector.Error:
-        users = []
-    finally:
-         if 'cursor' in locals(): cursor.close()
-         if 'conn' in locals(): conn.close()
-    
-    return render_template("browse.html", users=users)
-
-@app.route("/request")
-def request_page():
-    if "user_id" not in session:
-        return redirect(url_for("login"))
-    return render_template("request.html")
-
-@app.route("/logout")
+# LOGOUT
+@app.route('/logout')
 def logout():
     session.clear()
-    return redirect(url_for("login"))
+    flash("You have been logged out.", "success")
+    return redirect(url_for('home'))
 
-if __name__ == "__main__":
+# DASHBOARDS
+@app.route('/dashboard/student')
+def dashboard_student():
+    if 'user_id' not in session or session.get('role') != 'student':
+        flash("Unauthorized access.", "error")
+        return redirect(url_for('login'))
+    return render_template('dashboard_student.html')
+
+@app.route('/dashboard/mentor')
+def dashboard_mentor():
+    if 'user_id' not in session or session.get('role') != 'mentor':
+        flash("Unauthorized access.", "error")
+        return redirect(url_for('login'))
+    return render_template('dashboard_mentor.html')
+
+@app.route('/dashboard/admin')
+def dashboard_admin():
+    if 'user_id' not in session or session.get('role') != 'admin':
+        flash("Unauthorized access.", "error")
+        return redirect(url_for('login'))
+        
+    try:
+        conn = get_db()
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("SELECT id, firstname, lastname, username, email, role, created_at FROM users")
+        all_users = cursor.fetchall()
+        cursor.close()
+        conn.close()
+    except Exception as e:
+        print("Admin user fetch error:", e)
+        all_users = []
+        
+    return render_template('dashboard_admin.html', users=all_users)
+
+# EXPLORE
+@app.route('/explore')
+def explore():
+    return render_template('explore.html')
+
+# PROFILE
+@app.route('/profile')
+def profile():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    
+    try:
+        conn = get_db()
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("SELECT * FROM users WHERE id=%s", (session['user_id'],))
+        user_data = cursor.fetchone()
+        cursor.close()
+        conn.close()
+    except Exception as e:
+        print("Profile fetch error:", e)
+        user_data = None
+        
+    return render_template('profile.html', user=user_data)
+
+# REQUESTS
+@app.route('/requests')
+def requests_page():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    return render_template('requests.html')
+
+
+if __name__ == '__main__':
     app.run(debug=True)

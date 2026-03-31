@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block title %}Connection Requests{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="glass-card" style="text-align: center; margin-bottom: 2rem;">
+        <h2><i class="fas fa-inbox"></i> Your Mentorship Requests</h2>
+        <p style="color: var(--text-secondary);">Manage incoming and outgoing skill exchange sessions.</p>
+    </div>
+
+    <!-- Interface Structure -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 2rem;">
+        
+        <!-- Incoming -->
+        <div class="glass-card">
+            <h3>Pending Incoming (2)</h3>
+            <div style="margin-top: 1rem; display: flex; flex-direction: column; gap: 1rem;">
+                
+                <div style="background: rgba(0,0,0,0.2); padding: 1rem; border-radius: 8px; display: flex; justify-content: space-between; align-items: center;">
+                    <div style="display: flex; gap: 1rem; align-items: center;">
+                        <div style="width: 40px; height: 40px; border-radius: 50%; background: #00cec9; display: flex; align-items: center; justify-content: center; color: white;">A</div>
+                        <div>
+                            <h4 style="margin: 0;">Ananya Kumar</h4>
+                            <p style="margin: 0; font-size: 0.8rem; color: var(--text-secondary);">Requested session about React Router</p>
+                        </div>
+                    </div>
+                    <div id="req-action-1">
+                        <button onclick="document.getElementById('req-action-1').innerHTML = '<span style=\'color: var(--success); font-weight: bold; font-size: 0.8rem;\'><i class=\'fas fa-check\'></i> Accepted</span>';" class="btn btn-primary" style="padding: 0.2rem 0.6rem; font-size: 0.8rem;"><i class="fas fa-check"></i></button>
+                        <button onclick="document.getElementById('req-action-1').innerHTML = '<span style=\'color: var(--danger); font-weight: bold; font-size: 0.8rem;\'><i class=\'fas fa-times\'></i> Declined</span>';" class="btn btn-outline" style="padding: 0.2rem 0.6rem; font-size: 0.8rem; border-color: var(--danger); color: var(--danger);"><i class="fas fa-times"></i></button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Outgoing -->
+        <div class="glass-card">
+            <h3>Awaiting Response (1)</h3>
+            <div style="margin-top: 1rem; display: flex; flex-direction: column; gap: 1rem;">
+                
+                <div style="background: rgba(0,0,0,0.2); padding: 1rem; border-radius: 8px; display: flex; justify-content: space-between; align-items: center;">
+                    <div style="display: flex; gap: 1rem; align-items: center;">
+                        <div style="width: 40px; height: 40px; border-radius: 50%; background: #6c5ce7; display: flex; align-items: center; justify-content: center; color: white;">D</div>
+                        <div>
+                            <h4 style="margin: 0;">Devansh Das (Mentor)</h4>
+                            <p style="margin: 0; font-size: 0.8rem; color: var(--text-secondary);">For AWS Cloud Foundations</p>
+                        </div>
+                    </div>
+                    <div>
+                        <span style="font-size: 0.8rem; color: var(--secondary-color); background: rgba(0,206,201,0.1); padding: 0.3rem 0.6rem; border-radius: 4px;">Pending</span>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

@@ -1,2 +1,26 @@
+<<<<<<< HEAD
 node_modules/
 .env
+=======
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+
+# Database files
+*.sqlite3
+
+# Flask session
+flask_session/
+
+# IDEs
+.idea/
+.vscode/
+*.swp
+>>>>>>> 2bba966 (final update)

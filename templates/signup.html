@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block title %}Sign Up{% endblock %}
+
+{% block content %}
+<div class="auth-container" style="max-width: 600px;">
+    <div class="glass-card">
+        <div class="auth-header">
+            <h2>Create Your Account</h2>
+            <p>Join Skillify and start your learning journey</p>
+        </div>
+
+        <form action="{{ url_for('signup') }}" method="POST" id="signupForm">
+            <!-- Row 1: Names -->
+            <div style="display: flex; gap: 1rem; margin-bottom: 1.5rem;">
+                <div class="form-group" style="flex: 1; margin-bottom: 0;">
+                    <label for="firstname">First Name</label>
+                    <input type="text" id="firstname" name="firstname" class="form-control" required>
+                </div>
+                <div class="form-group" style="flex: 1; margin-bottom: 0;">
+                    <label for="lastname">Last Name</label>
+                    <input type="text" id="lastname" name="lastname" class="form-control" required>
+                </div>
+            </div>
+
+            <!-- Row 2: Credentials -->
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" class="form-control" required>
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <input type="email" id="email" name="email" class="form-control" required>
+            </div>
+
+            <!-- Row 3: Password with Tracker -->
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" class="form-control" required>
+                <div class="password-requirements" id="pwd-tracker">
+                    <span id="req-upper" class="req-item invalid"><i class="fas fa-times-circle"></i> 1 Uppercase</span>
+                    <span id="req-lower" class="req-item invalid"><i class="fas fa-times-circle"></i> 1 Lowercase</span>
+                    <span id="req-num" class="req-item invalid"><i class="fas fa-times-circle"></i> 1 Number</span>
+                    <span id="req-special" class="req-item invalid"><i class="fas fa-times-circle"></i> 1 Special Char</span>
+                </div>
+            </div>
+
+            <!-- Role Selection -->
+            <div class="form-group">
+                <label for="role">Select Your Role</label>
+                <select id="role" name="role" class="form-control" required>
+                    <option value="" disabled selected>-- Choose Role --</option>
+                    <option value="student">Student (Looking to learn)</option>
+                    <option value="mentor">Mentor (Looking to teach)</option>
+                    <option value="admin">Administrator Staff</option>
+                </select>
+            </div>
+
+            <!-- Dynamic Fields Container -->
+            <div id="dynamic-fields" style="background: rgba(255,255,255,0.02); padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; border: 1px dashed var(--glass-border);">
+                <p style="color: var(--text-secondary); font-size: 0.9rem; text-align: center;">Select a role to see additional fields.</p>
+            </div>
+
+            <button type="submit" id="signupBtn" class="btn btn-primary" style="width: 100%;" disabled>Create Account</button>
+        </form>
+
+        <p style="text-align: center; margin-top: 2rem; color: var(--text-secondary);">
+            Already have an account? <a href="{{ url_for('login') }}">Log in</a>
+        </p>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+
+{% block title %}Mentor Dashboard{% endblock %}
+
+{% block content %}
+<div class="dashboard-grid">
+    <!-- Sidebar -->
+    <aside class="glass-card" style="padding: 1.5rem 1rem; align-self: start; position: sticky; top: 100px;">
+        <h3 style="padding-left: 1rem; margin-bottom: 1.5rem; font-size: 1.2rem;">Menu</h3>
+        <ul class="sidebar-menu">
+            <li><a href="#" class="active"><i class="fas fa-columns"></i> Dashboard</a></li>
+            <li><a href="{{ url_for('requests_page') }}"><i class="fas fa-inbox"></i> Session Requests</a></li>
+            <li><a href="#schedule"><i class="fas fa-calendar-alt"></i> Schedule</a></li>
+            <li><a href="{{ url_for('profile') }}"><i class="fas fa-user-edit"></i> Edit Profile</a></li>
+        </ul>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="dashboard-sections">
+        <div class="glass-card">
+            <h2>Mentor Overview</h2>
+            <p style="color: var(--text-secondary);">Manage your students, sessions, and upcoming meetings.</p>
+        </div>
+
+        <div class="stats-grid">
+            <div class="glass-card stat-card">
+                <div class="stat-icon"><i class="fas fa-users"></i></div>
+                <div class="stat-info">
+                    <h4>8</h4>
+                    <p>Active Mentees</p>
+                </div>
+            </div>
+            <div class="glass-card stat-card">
+                <div class="stat-icon" style="background: rgba(85, 239, 196, 0.1); color: var(--success);"><i class="fas fa-star"></i></div>
+                <div class="stat-info">
+                    <h4>4.9</h4>
+                    <p>Average Rating</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Schedule & Video Demo -->
+        <div id="schedule" class="glass-card">
+            <h3>Upcoming Virtual Lecture</h3>
+            <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">Join your next scheduled session below.</p>
+            
+            <div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 8px; margin-bottom: 1rem;">
+                <!-- Demo Video -->
+                <iframe style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;" src="https://www.youtube.com/embed/dQw4w9WgXcQ" title="Mentor Demo Video" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+            </div>
+            <button class="btn btn-primary" style="width: 100%;"><i class="fas fa-video"></i> Start Virtual Lecture</button>
+        </div>
+
+        <div class="glass-card">
+            <h3>Recent Session Requests</h3>
+            <div class="table-responsive" style="margin-top: 1rem;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Student</th>
+                            <th>Topic</th>
+                            <th>Date Requested</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Rahul Sharma</td>
+                            <td>React Hooks Debugging</td>
+                            <td>Oct 24, 2026</td>
+                            <td id="action-1">
+                                <button onclick="document.getElementById('action-1').innerHTML = '<span style=\'color: var(--success); font-weight: bold;\'><i class=\'fas fa-check\'></i> Accepted</span>';" class="btn btn-primary" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;">Accept</button>
+                                <button onclick="document.getElementById('action-1').innerHTML = '<span style=\'color: var(--danger); font-weight: bold;\'><i class=\'fas fa-times\'></i> Declined</span>';" class="btn btn-outline" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;">Decline</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Priya Singh</td>
+                            <td>Portfolio Review</td>
+                            <td>Oct 25, 2026</td>
+                            <td id="action-2">
+                                <button onclick="document.getElementById('action-2').innerHTML = '<span style=\'color: var(--success); font-weight: bold;\'><i class=\'fas fa-check\'></i> Accepted</span>';" class="btn btn-primary" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;">Accept</button>
+                                <button onclick="document.getElementById('action-2').innerHTML = '<span style=\'color: var(--danger); font-weight: bold;\'><i class=\'fas fa-times\'></i> Declined</span>';" class="btn btn-outline" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;">Decline</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
