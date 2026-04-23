@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block content %}
+<div class="dashboard-grid">
+    <!-- Sidebar -->
+    <aside class="glass-card" style="padding: 1.5rem 1rem; align-self: start; position: sticky; top: 100px;">
+        <h3 style="padding-left: 1rem; margin-bottom: 1.5rem; font-size: 1.2rem;">Admin Menu</h3>
+        <ul class="sidebar-menu">
+            <li><a href="#" class="active"><i class="fas fa-users-cog"></i> User Management</a></li>
+            <li><a href="#"><i class="fas fa-chart-line"></i> Analytics</a></li>
+            <li><a href="#"><i class="fas fa-cog"></i> System Settings</a></li>
+        </ul>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="dashboard-sections">
+        <div class="glass-card">
+            <h2>Administration Panel</h2>
+            <p style="color: var(--text-secondary);">Manage users, oversee mentor approvals, and configure system settings.</p>
+        </div>
+
+        <div class="glass-card">
+            <h3>Registered Users</h3>
+            <div class="table-responsive" style="margin-top: 1rem;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Username</th>
+                            <th>Email</th>
+                            <th>Role</th>
+                            <th>Joined Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if users %}
+                            {% for u in users %}
+                            <tr>
+                                <td>{{ u.id }}</td>
+                                <td>{{ u.firstname }} {{ u.lastname }}</td>
+                                <td>{{ u.username }}</td>
+                                <td>{{ u.email }}</td>
+                                <td>
+                                    <span class="badge badge-{{ u.role }}">
+                                        {{ u.role | capitalize }}
+                                    </span>
+                                </td>
+                                <td>{{ u.created_at }}</td>
+                            </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="6" style="text-align: center; color: var(--text-secondary);">No users found.</td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

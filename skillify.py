@@ -58,7 +58,11 @@ def get_db():
 def home():
     if "user_id" in session:
         return redirect(url_for("dashboard"))
-    return redirect(url_for("login"))
+    return render_template("index.html")
+
+@app.route("/explore")
+def explore():
+    return render_template("explore.html")
 
 @app.route("/signup", methods=["GET", "POST"])
 def signup():
@@ -107,13 +111,13 @@ def signup():
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
-        username = request.form.get("username")
+        email = request.form.get("email")
         password = request.form.get("password")
 
         try:
             conn = get_db()
             cursor = conn.cursor(dictionary=True)
-            cursor.execute("SELECT * FROM users WHERE username = %s", (username,))
+            cursor.execute("SELECT * FROM users WHERE email = %s", (email,))
             user = cursor.fetchone()
         except mysql.connector.Error as err:
             flash(f"Database error: {err}", "error")
@@ -149,7 +153,15 @@ def dashboard():
         if 'cursor' in locals(): cursor.close()
         if 'conn' in locals(): conn.close()
     
-    return render_template("dashboard.html", user=user)
+    if user:
+        if user['role'] == 'student':
+            return render_template("dashboard_student.html", user=user)
+        elif user['role'] == 'mentor':
+            return render_template("dashboard_mentor.html", user=user)
+        elif user['role'] == 'admin':
+            return render_template("dashboard_admin.html", user=user)
+    
+    return redirect(url_for("home"))
 
 @app.route("/profile")
 def profile():
@@ -187,11 +199,11 @@ def browse():
     
     return render_template("browse.html", users=users)
 
-@app.route("/request")
+@app.route("/requests")
 def request_page():
     if "user_id" not in session:
         return redirect(url_for("login"))
-    return render_template("request.html")
+    return render_template("requests.html")
 
 @app.route("/logout")
 def logout():
