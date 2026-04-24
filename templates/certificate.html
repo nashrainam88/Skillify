@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+
+{% block title %}Certificate of Completion{% endblock %}
+
+{% block content %}
+<style>
+    .certificate-wrapper {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 2rem;
+    }
+    .certificate-card {
+        background: url('https://www.transparenttextures.com/patterns/old-wall.png'), linear-gradient(135deg, #1e293b, #0f172a);
+        border: 10px solid #cbd5e1;
+        padding: 4rem;
+        text-align: center;
+        max-width: 800px;
+        width: 100%;
+        border-radius: 12px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+        position: relative;
+    }
+    .certificate-card::before {
+        content: '';
+        position: absolute;
+        top: 20px; left: 20px; right: 20px; bottom: 20px;
+        border: 2px dashed #94a3b8;
+        pointer-events: none;
+    }
+    .cert-title {
+        font-size: 3.5rem;
+        color: #f8fafc;
+        margin-bottom: 1rem;
+        font-family: 'Georgia', serif;
+        text-transform: uppercase;
+        letter-spacing: 4px;
+    }
+    .cert-presented {
+        font-size: 1.2rem;
+        color: #cbd5e1;
+        margin-bottom: 2rem;
+    }
+    .cert-name {
+        font-size: 3rem;
+        color: #38bdf8;
+        margin-bottom: 2rem;
+        font-weight: bold;
+        border-bottom: 2px solid #38bdf8;
+        display: inline-block;
+        padding-bottom: 5px;
+    }
+    .cert-body {
+        font-size: 1.2rem;
+        color: #cbd5e1;
+        margin-bottom: 3rem;
+    }
+    .cert-skill {
+        font-size: 2rem;
+        color: #fbbf24;
+        font-weight: bold;
+    }
+    .cert-footer {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 4rem;
+        border-top: 1px solid #475569;
+        padding-top: 1.5rem;
+    }
+    .cert-signature {
+        width: 40%;
+    }
+    .cert-signature p {
+        margin: 0;
+        font-size: 1.1rem;
+        color: #f8fafc;
+        font-weight: 600;
+    }
+    .cert-signature span {
+        font-size: 0.9rem;
+        color: #94a3b8;
+    }
+</style>
+
+<div class="certificate-wrapper">
+    <div class="certificate-card" id="printable-certificate">
+        <h1 class="cert-title">Certificate of Completion</h1>
+        <p class="cert-presented">This is proudly presented to</p>
+        <div class="cert-name">{{ cert.s_first }} {{ cert.s_last }}</div>
+        <div class="cert-body">
+            For successfully completing the skills requirements and demonstrating outstanding knowledge in:
+            <br><br>
+            <span class="cert-skill">{{ cert.skill }}</span>
+        </div>
+        
+        <div class="cert-footer">
+            <div class="cert-signature">
+                <p>{{ cert.issued_at.strftime('%B %d, %Y') }}</p>
+                <span>Date of Completion</span>
+            </div>
+            <div class="cert-signature">
+                <p>{{ cert.m_first }} {{ cert.m_last }}</p>
+                <span>Instructor / Mentor</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="text-center mt-4">
+    <button onclick="window.print()" class="btn btn-primary"><i class="fas fa-print"></i> Print Certificate</button>
+    <a href="{{ url_for('dashboard') }}" class="btn btn-outline" style="margin-left: 1rem;">Back to Dashboard</a>
+</div>
+{% endblock %}
